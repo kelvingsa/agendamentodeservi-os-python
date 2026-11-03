@@ -1,0 +1,55 @@
+@app.route("/agendar", methods=["POST"])
+def agendar():
+    nome = request.form.get("nome", "").strip()
+    contato = request.form.get("contato", "").strip()
+    servico = request.form.get("servico", "").strip()
+    profissional = request.form.get("profissional", "").strip()
+    data = request.form.get("data", "").strip()
+    horario = request.form.get("horario", "").strip()
+    observacoes = request.form.get("observacoes", "").strip()
+
+    if not all([nome, contato, servico, profissional, data, horario]):
+        flash("Preencha todos os campos obrigatórios.", "erro")
+        return redirect(url_for("inicio"))
+    if servico not in [s["nome"] for s in SERVICOS] or profissional not in PROFISSIONAIS or horario not in HORARIOS:
+        flash("Selecione opções válidas para serviço, profissional e horário.", "erro")
+        return redirect(url_for("inicio"))
+    try:
+        data_hora = datetime.strptime(f"{data} {horario}", "%Y-%m-%d %H:%M")
+    except ValueError:
+        flash("Data ou horário inválido.", "erro")
+        return redirect(url_for("inicio"))
+    if data_hora <= datetime.now():
+        flash("Escolha uma data e um horário futuros.", "erro")
+        return redirect(url_for("inicio"))
+
+    with conectar() as conn:
+        conflito = conn.execute("""
+            SELECT id FROM agendamentos
+            WHERE data = ? AND horario = ? AND profissional = ? AND status = 'Confirmado'
+        """, (data, horario, profissional)).fetchone()
+        if conflito:
+            flash("Esse profissional já tem um atendimento marcado nesse horário.", "erro")
+            return redirect(url_for("inicio"))
+        conn.execute("""
+            INSERT INTO agendamentos
+            (nome, contato, servico, profissional, data, horario, observacoes, status, criado_em)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'Confirmado', ?)
+        """, (nome, contato, servico, profissional, data, horario, observacoes,
+              datetime.now().isoformat(timespec="minutes")))
+    flash("Agendamento confirmado! Seu horário foi adicionado à agenda.", "sucesso")
+    return redirect(url_for("inicio"))
+
+
+@app.route("/cancelar/<int:agendamento_id>", methods=["POST"])
+def cancelar(agendamento_id):
+    with conectar() as conn:
+        conn.execute("UPDATE agendamentos SET status = 'Cancelado' WHERE id = ? AND status = 'Confirmado'",
+                     (agendamento_id,))
+    flash("Agendamento cancelado. O registro foi mantido no histórico.", "sucesso")
+    return redirect(url_for("inicio"))
+
+
+if __name__ == "__main__":
+    preparar_banco()
+    app.run(debug=True)
