@@ -1,249 +1,137 @@
-# -*- coding: utf-8 -*-
-import tkinter as tk
-from tkinter import ttk, messagebox
-import datetime
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flow - Gestão de Bem-Estar</title>
+    <!-- Tailwind CSS para um design limpo, minimalista e fluido -->
+    <script src="https://tailwindcss.com"></script>
+    <script>
+        // Configuração personalizada de temas baseada nos requisitos anteriores
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        lavanda: { fundo: '#F3F0F7', primaria: '#6C5CE7', secundaria: '#A29BFE', texto: '#2D3436', card: '#FFFFFF' },
+                        botanico: { fundo: '#F0F7F4', primaria: '#10AC84', secundaria: '#1DD1A1', texto: '#222F3E', card: '#FFFFFF' },
+                        por_do_sol: { fundo: '#FFF9F5', primaria: '#FF6B6B', secundaria: '#FFA801', texto: '#2C3E50', card: '#FFFFFF' },
+                        noite: { fundo: '#1E272E', primaria: '#05C46B', secundaria: '#485460', texto: '#FFFFFF', card: '#2F3640' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Ícones modernos para os botões -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+</head>
+<body id="body-bg" class="bg-lavanda-fundo text-slate-800 font-sans min-h-screen transition-colors duration-300">
 
-# --- BANCO DE DADOS SIMULADO (MEMÓRIA) ---
-PROFISSIONAIS = ["Carlos Silva (Moderno)", "Ana Oliveira (Feminino)", "Marcos Sousa (Clássico)"]
-SERVICOS = [
-    {"nome": "Corte Masculino", "preco": 45.00},
-    {"nome": "Corte Feminino", "preco": 70.00},
-    {"nome": "Barba Completa", "preco": 30.00},
-    {"nome": "Combo: Corte + Barba", "preco": 65.00}
-]
-HORARIOS = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00"]
+    <!-- 1. BARRA SUPERIOR: SELETOR DE TEMAS COLORIDOS -->
+    <header id="header-card" class="bg-white shadow-sm border-b border-slate-100 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div id="brand-logo" class="bg-[#6C5CE7] text-white p-2.5 rounded-xl shadow-md transition-colors duration-300">
+                    <i class="fa-solid fa-scissors text-xl"></i>
+                </div>
+                <h1 class="text-2xl font-black tracking-tight" id="main-title">FLOW <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 uppercase tracking-wider ml-1">Protótipo</span></h1>
+            </div>
+            <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-200">
+                <label for="theme-select" class="text-xs font-bold uppercase tracking-wider text-slate-500 pl-2">Ambiente:</label>
+                <select id="theme-select" onchange="mudarTema(this.value)" class="bg-white border border-slate-200 text-sm rounded-lg px-3 py-1.5 font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1">
+                    <option value="lavanda">🪻 Lavanda Relaxante</option>
+                    <option value="botanico"> Verde Botânico</option>
+                    <option value="por_do_sol"> Pôr do Sol Quente</option>
+                    <option value="noite"> Noite Elegante</option>
+                </select>
+            </div>
+        </div>
+    </header>
 
-agendamentos = [
-    {"id": 1, "cliente": "Lucas Almeida", "servico": "Corte Masculino", "profissional": "Carlos Silva (Moderno)", "data": "15/11/2026", "horario": "10:00"},
-    {"id": 2, "cliente": "Mariana Costa", "servico": "Corte Feminino", "profissional": "Ana Oliveira (Feminino)", "data": "15/11/2026", "horario": "14:00"}
-]
-proximo_id = 3
+    <!-- CONTAINER PRINCIPAL EM DUAS COLUNAS -->
+    <main class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- COLUNA ESQUERDA: FORMULÁRIO ENXUTO (CARD) -->
+        <section id="form-card" class="lg:col-span-4 bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-100/50 flex flex-col justify-between transition-colors duration-300">
+            <div>
+                <h2 id="form-title" class="text-xl font-bold text-[#6C5CE7] mb-6 flex items-center gap-2 transition-colors duration-300">
+                    <i class="fa-regular fa-calendar-plus"></i> Agendar Momento
+                </h2>
+                
+                <form id="form-agendamento" onsubmit="criarAgendamento(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Nome do Cliente</label>
+                        <input type="text" id="nome" placeholder="Ex: Lucas Almeida" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/20 focus:border-[#6C5CE7] transition-all">
+                    </div>
 
-# --- PALETAS DE CORES (TEMAS) ---
-TEMAS = {
-    "Lavanda Relaxante": {"fundo": "#F3F0F7", "primaria": "#6C5CE7", "secundaria": "#A29BFE", "texto": "#2D3436", "card": "#FFFFFF"},
-    "Verde Botânico": {"fundo": "#F0F7F4", "primaria": "#10AC84", "secundaria": "#1DD1A1", "texto": "#222F3E", "card": "#FFFFFF"},
-    "Pôr do Sol Quente": {"fundo": "#FFF9F5", "primaria": "#FF6B6B", "secundaria": "#FFA801", "texto": "#2C3E50", "card": "#FFFFFF"},
-    "Noite Elegante": {"fundo": "#1E272E", "primaria": "#05C46B", "secundaria": "#485460", "texto": "#FFFFFF", "card": "#2F3640"}
-}
-tema_atual = "Lavanda Relaxante"
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Serviço Desejado</label>
+                        <select id="servico" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/20 focus:border-[#6C5CE7] transition-all">
+                            <option value="Corte Masculino">Corte Masculino — R$ 45,00</option>
+                            <option value="Corte Feminino">Corte Feminino — R$ 70,00</option>
+                            <option value="Barba Completa">Barba Completa — R$ 30,00</option>
+                            <option value="Combo: Corte + Barba">Combo: Corte + Barba — R$ 65,00</option>
+                        </select>
+                    </div>
 
-# --- FUNÇÕES DE INTERAÇÃO E REGRAS DE NEGÓCIO ---
-def mudar_tema(event=None):
-    global tema_atual
-    tema_atual = combo_temas.get()
-    cores = TEMAS[tema_atual]
-    
-    # Atualiza janelas e frames principais
-    root.configure(bg=cores["fundo"])
-    frame_topo.configure(bg=cores["card"])
-    main_frame.configure(bg=cores["fundo"])
-    col_esquerda.configure(bg=cores["card"])
-    col_direita.configure(bg=cores["fundo"])
-    frame_botoes_menu.configure(bg=cores["fundo"])
-    
-    # Atualiza as labels de texto comuns
-    for label in labels_comuns:
-        label.configure(bg=cores["card"] if label.master == col_esquerda else cores["fundo"], fg=cores["texto"])
-    
-    # Atualiza os cabeçalhos
-    label_titulo_esq.configure(bg=cores["card"], fg=cores["primaria"])
-    label_titulo_dir.configure(bg=cores["fundo"], fg=cores["primaria"])
-    lbl_seletor.configure(bg=cores["card"], fg=cores["texto"])
-    
-    # Configura os estilos do TTK (Tabela e Combobox)
-    style.configure("Treeview", background=cores["card"], foreground=cores["texto"], fieldbackground=cores["card"])
-    style.configure("Treeview.Heading", background=cores["secundaria"], foreground="#FFFFFF")
-    
-    # Estilização manual dos botões coloridos
-    btn_confirmar.configure(bg=cores["primaria"], fg="#FFFFFF", activebackground=cores["secundaria"])
-    btn_liberar.configure(bg="#E74C3C", fg="#FFFFFF", activebackground="#FF7675")
-    btn_detalhes.configure(bg=cores["secundaria"], fg="#FFFFFF", activebackground=cores["primaria"])
-    btn_filtrar.configure(bg=cores["secundaria"], fg="#FFFFFF", activebackground=cores["primaria"])
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Profissional de Preferência</label>
+                        <select id="profissional" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/20 focus:border-[#6C5CE7] transition-all">
+                            <option value="Carlos Silva (Moderno)">Carlos Silva (Moderno)</option>
+                            <option value="Ana Oliveira (Feminino)">Ana Oliveira (Feminino)</option>
+                            <option value="Marcos Sousa (Clássico)">Marcos Sousa (Clássico)</option>
+                        </select>
+                    </div>
 
-def confirmar_agendamento():
-    global proximo_id
-    cliente = entry_nome.get().strip()
-    servico_idx = combo_servico.current()
-    profissional = combo_prof.get()
-    data = entry_data.get().strip()
-    horario = combo_hora.get()
-    
-    if not cliente:
-        messagebox.showinfo("Dica de Amigo", "Diga-nos o seu nome para personalizarmos seu atendimento! ")
-        return
-    
-    try:
-        datetime.datetime.strptime(data, "%d/%m/%Y")
-    except ValueError:
-        messagebox.showinfo("Ajuste de Data", "Para organizarmos tudo certinho, use o formato padrão: DD/MM/AAAA ")
-        return
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Data Escolhida</label>
+                            <input type="date" id="data" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/20 focus:border-[#6C5CE7] transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Horário Ideal</label>
+                            <select id="horario" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/20 focus:border-[#6C5CE7] transition-all">
+                                <option value="09:00">09:00</option>
+                                <option value="10:00">10:00</option>
+                                <option value="11:00">11:00</option>
+                                <option value="13:00">13:00</option>
+                                <option value="14:00">14:00</option>
+                                <option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option>
+                                <option value="17:00">17:00</option>
+                            </select>
+                        </div>
+                    </div>
 
-    servico_nome = SERVICOS[servico_idx]["nome"]
-    
-    # Validação inteligente de choque de horários
-    for ag in agendamentos:
-        if ag["profissional"] == profesional and ag["data"] == data and ag["horario"] == horario:
-            messagebox.showinfo("Horário Ocupado", "Este profissional já tem um agendamento nesta hora. Que tal escolher outro momento perfeito para você? ")
-            return
-
-    novo_ag = {
-        "id": proximo_id, "cliente": cliente, "servico": servico_nome,
-        "profissional": profissional, "data": data, "horario": horario
-    }
-    agendamentos.append(novo_ag)
-    proximo_id += 1
-    
-    entry_nome.delete(0, tk.END)
-    atualizar_lista()
-    messagebox.showinfo("Sucesso!", "Seu momento de autocuidado foi reservado com sucesso! ")
-
-def liberar_horario():
-    selecionado = tree.selection()
-    if not selecionado:
-        messagebox.showinfo("Aviso", "Selecione o agendamento que deseja reorganizar na tabela ao lado. ")
-        return
-    
-    id_ag = int(tree.item(selecionado, "values")[0])
-    for ag in agendamentos:
-        if ag["id"] == id_ag:
-            agendamentos.remove(ag)
-            break
+                    <button type="submit" id="btn-submit" class="w-full mt-4 bg-[#6C5CE7] hover:opacity-90 text-white font-bold text-sm rounded-xl py-3.5 shadow-lg shadow-[#6C5CE7]/20 transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-sparkles"></i> Confirmar Horário
+                    </button>
+                </form>
+            </div>
             
-    atualizar_lista()
-    messagebox.showinfo("Agenda Atualizada", "Horário liberado com sucesso. Esperamos você em breve! ")
+            <!-- Caixa de Notificação Sutil integrada ao Design -->
+            <div id="info-box" class="mt-6 p-4 rounded-xl bg-slate-50 border border-slate-100 flex gap-3 text-xs text-slate-600">
+                <span class="text-base text-amber-500"><i class="fa-regular fa-lightbulb"></i></span>
+                <p><strong>Dica de Uso:</strong> Você pode clicar em qualquer linha da tabela para selecioná-la e usar os botões do menu inferior de ações.</p>
+            </div>
+        </section>
 
-def ver_detalhes():
-    selecionado = tree.selection()
-    if not selecionado:
-        messagebox.showinfo("Consulta", "Selecione um agendamento para ver os detalhes completos. ")
-        return
-    
-    valores = tree.item(selecionado, "values")
-    detalhes = f" Código: {valores[0]}\n👤 Cliente: {valores[1]}\n Serviço: {valores[2]}\n💈 Profissional: {valores[3]}\n Horário: {valores[4]}"
-    messagebox.showinfo("Detalhes do Agendamento", detalhes)
+        <!-- COLUNA DIREITA: PAINEL DE VISUALIZAÇÃO CLARA -->
+        <section class="lg:col-span-8 flex flex-col justify-between">
+            <div>
+                <!-- Menu superior do usuário: Busca e Filtro rápido -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <h2 id="table-title" class="text-xl font-bold text-[#6C5CE7] transition-colors duration-300">Agenda do Salão</h2>
+                    <div class="w-full sm:w-auto flex items-center gap-2 bg-white rounded-xl px-3 py-1.5 border border-slate-200 shadow-sm focus-within:ring-2 focus-within:ring-[#6C5CE7]/20">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm"></i>
+                        <input type="text" id="busca" oninput="filtrarClientes()" placeholder="Buscar cliente por nome..." class="bg-transparent text-sm w-full sm:w-60 focus:outline-none">
+                    </div>
+                </div>
 
-def filtrar_clientes():
-    termo = entry_busca.get().strip().lower()
-    for item in tree.get_children():
-        tree.delete(item)
-    
-    for ag in agendamentos:
-        if termo in ag["cliente"].lower():
-            tree.insert("", tk.END, values=(ag["id"], ag["cliente"], ag["servico"], ag["profissional"], f"{ag['data']} às {ag['horario']}"))
-
-def atualizar_lista():
-    for item in tree.get_children():
-        tree.delete(item)
-    for ag in agendamentos:
-        tree.insert("", tk.END, values=(ag["id"], ag["cliente"], ag["servico"], ag["profissional"], f"{ag['data']} às {ag['horario']}"))
-
-# --- ESTRUTURA DA INTERFACE GRAFICA ---
-root = tk.Tk()
-root.title("Flow Barber & Beauty - Protótipo de Agendamento")
-root.geometry("1000x600")
-
-style = ttk.Style()
-style.theme_use("clam")
-style.configure("Treeview", font=("Helvetica", 10), rowheight=25)
-style.configure("Treeview.Heading", font=("Helvetica", 10, "bold"))
-
-labels_comuns = []
-
-# --- 1. BARRA SUPERIOR (MENU DE TEMAS) ---
-frame_topo = tk.Frame(root, height=50, bd=0, relief=tk.FLAT)
-frame_topo.pack(fill=tk.X, side=tk.TOP, ipady=5)
-
-lbl_seletor = tk.Label(frame_topo, text="Personalize as Cores do seu Espaço:", font=("Helvetica", 10, "bold"))
-lbl_seletor.pack(side=tk.LEFT, padx=20)
-
-combo_temas = ttk.Combobox(frame_topo, values=list(TEMAS.keys()), state="readonly", font=("Helvetica", 10))
-combo_temas.pack(side=tk.LEFT, padx=5)
-combo_temas.current(0)
-combo_temas.bind("<<ComboboxSelected>>", mudar_tema)
-
-# --- CONTAINER PRINCIPAL (DUAS COLUNAS) ---
-main_frame = tk.Frame(root, padding=20)
-main_frame.pack(fill=tk.BOTH, expand=True)
-
-# Coluna Esquerda - Formulário (Efeito Card Embutido)
-col_esquerda = tk.Frame(main_frame, width=360, bd=0, highlightthickness=1, highlightbackground="#E2E8F0", padding=20)
-col_esquerda.pack(side=tk.LEFT, fill=tk.BOTH, padx=(0, 20))
-col_esquerda.pack_propagate(False)
-
-# Coluna Direita - Tabela e Menus de Ação
-col_direita = tk.Frame(main_frame)
-col_direita.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
-
-# --- ELEMENTOS DA COLUNA ESQUERDA (FORMULÁRIO) ---
-label_titulo_esq = tk.Label(col_esquerda, text="Agendar Momento", font=("Helvetica", 16, "bold"))
-label_titulo_esq.pack(anchor=tk.W, pady=(0, 15))
-
-lbl1 = tk.Label(col_esquerda, text="Nome do Cliente:", font=("Helvetica", 10, "bold"))
-lbl1.pack(anchor=tk.W, pady=(5, 2)); labels_comuns.append(lbl1)
-entry_nome = ttk.Entry(col_esquerda, font=("Helvetica", 11))
-entry_nome.pack(fill=tk.X, pady=(0, 10))
-
-lbl2 = tk.Label(col_esquerda, text="Serviço Desejado:", font=("Helvetica", 10, "bold"))
-lbl2.pack(anchor=tk.W, pady=(5, 2)); labels_comuns.append(lbl2)
-lista_servicos_texto = [f"{s['nome']} — R$ {s['preco']:.2f}" for s in SERVICOS]
-combo_servico = ttk.Combobox(col_esquerda, values=lista_servicos_texto, state="readonly", font=("Helvetica", 10))
-combo_servico.pack(fill=tk.X, pady=(0, 10))
-combo_servico.current(0)
-
-lbl3 = tk.Label(col_esquerda, text="Profissional:", font=("Helvetica", 10, "bold"))
-lbl3.pack(anchor=tk.W, pady=(5, 2)); labels_comuns.append(lbl3)
-combo_prof = ttk.Combobox(col_esquerda, values=PROFISSIONAIS, state="readonly", font=("Helvetica", 10))
-combo_prof.pack(fill=tk.X, pady=(0, 10))
-combo_prof.current(0)
-
-lbl4 = tk.Label(col_esquerda, text="Data Escolhida:", font=("Helvetica", 10, "bold"))
-lbl4.pack(anchor=tk.W, pady=(5, 2)); labels_comuns.append(lbl4)
-entry_data = ttk.Entry(col_esquerda, font=("Helvetica", 11))
-entry_data.insert(0, datetime.date.today().strftime("%d/%m/%Y"))
-entry_data.pack(fill=tk.X, pady=(0, 10))
-
-lbl5 = tk.Label(col_esquerda, text="Horário Disponível:", font=("Helvetica", 10, "bold"))
-lbl5.pack(anchor=tk.W, pady=(5, 2)); labels_comuns.append(lbl5)
-combo_hora = ttk.Combobox(col_esquerda, values=HORARIOS, state="readonly", font=("Helvetica", 10))
-combo_hora.pack(fill=tk.X, pady=(0, 25))
-combo_hora.current(0)
-
-btn_confirmar = tk.Button(col_esquerda, text="  Confirmar e Agendar", font=("Helvetica", 11, "bold"), bd=0, relief=tk.FLAT, cursor="hand2", command=confirmar_agendamento)
-btn_confirmar.pack(fill=tk.X, ipady=6)
-
-# --- ELEMENTOS DA COLUNA DIREITA (TABELA E BOTÕES DE MENU) ---
-label_titulo_dir = tk.Label(col_direita, text="Painel de Agendamentos Ativos", font=("Helvetica", 16, "bold"))
-label_titulo_dir.pack(anchor=tk.W, pady=(0, 15))
-
-# Barra de Pesquisa Rápida (Filtro)
-frame_busca = tk.Frame(col_direita, bg="#FAFAFA")
-frame_busca.pack(fill=tk.X, pady=(0, 10))
-
-lbl_busca = tk.Label(frame_busca, text="Buscar Cliente:", font=("Helvetica", 10, "bold"))
-lbl_busca.pack(side=tk.LEFT, padx=(0, 10)); labels_comuns.append(lbl_busca)
-entry_busca = ttk.Entry(frame_busca, font=("Helvetica", 10), width=25)
-entry_busca.pack(side=tk.LEFT, padx=(0, 10))
-btn_filtrar = tk.Button(frame_busca, text="Filtrar", font=("Helvetica", 9, "bold"), bd=0, padding=4, command=filtrar_clientes)
-btn_filtrar.pack(side=tk.LEFT)
-
-columns = ("id", "cliente", "servico", "profissional", "horario")
-tree = ttk.Treeview(col_direita, columns=columns, show="headings", selectmode="browse")
-tree.heading("id", text="ID")
-tree.heading("cliente", text="Cliente")
-tree.heading("servico", text="Serviço")
-tree.heading("profissional", text="Profissional")
-tree.heading("horario", text="Data & Horário")
-tree.column("id", width=40, anchor=tk.CENTER)
-tree.column("cliente", width=140, anchor=tk.W)
-tree.column("servico", width=120, anchor=tk.W)
-tree.column("profissional", width=150, anchor=tk.W)
-tree.column("horario", width=160, anchor=tk.W)
-tree.pack(fill=tk.BOTH, expand=True, pady=(0, 15
-
-    frame_botoes_menu = tk.Frame(col_direita)
-frame_botoes_menu.pack(fill=tk.X)
-btn_detalhes = tk.Button(frame_botoes_menu, text=" Ver Ficha Completa", font=("Helvetica", 10, "bold"), bd=0, relief=tk.FLAT, cursor="hand2", command=ver_detalhes)
-btn_detalhes.pack(side=tk.LEFT, padx=(0, 10), ipady=5, ipadx=10)
-btn_liberar = tk.Button(frame_botoes_menu, text=" Liberar Horário (Cancelar)", font=("Helvetica", 10, "bold"), bd=0, relief=tk.FLAT, cursor="hand2", command=liberar_horario)
-btn_liberar.pack(side=tk.RIGHT, ipady=5, ipadx=10)
+                <!-- Tabela responsiva minimalista -->
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr id="table-header" class="bg-[#A29BFE] text-white font-semibold transition-colors duration-300">
+                                    <th class="p-4 w-16 text-center">ID</th>
+                                    <th class="p-4">Cliente</th>
