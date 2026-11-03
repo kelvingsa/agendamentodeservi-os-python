@@ -133,3 +133,133 @@
                     </div>
                     <div class="w-full sm:w-auto flex items-center gap-2 bg-slate-50 rounded-xl px-3 py-2 border border-slate-200/80 focus-within:ring-2 focus-within:ring-[#6C5CE7]/20 focus-within:bg-white transition-all">
                         <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm"></i>
+
+                        
+let agendamentos = [
+{ id: 1, cliente: "Lucas Almeida", servico: "Corte Masculino", profissional: "Carlos Silva (Moderno)", data: "2026-11-15", horario: "10:00" },
+{ id: 2, cliente: "Mariana Costa", servico: "Corte Feminino", profissional: "Ana Oliveira (Feminino)", data: "2026-11-15", horario: "14:00" }
+];
+let proximoId = 3;
+let idSelecionado = null;
+// Inicia com a data de hoje configurada no campo para poupar tempo
+document.getElementById('data').value = new Date().toISOString().split('T')[0];
+// Mapeamento das Paletas de Cores por Tema
+const temasConfig = {
+lavanda: { fundo: 'bg-lavanda-fundo', primColor: '#6C5CE7', headColor: '#A29BFE', cardClass: 'bg-white', textClass: 'text-slate-800', borderClass: 'border-slate-100' },
+botanico: { fundo: 'bg-botanico-fundo', primColor: '#10AC84', headColor: '#1DD1A1', cardClass: 'bg-white', textClass: 'text-slate-800', borderClass: 'border-slate-100' },
+por_do_sol: { fundo: 'bg-por_do_sol-fundo', primColor: '#FF6B6B', headColor: '#FFA801', cardClass: 'bg-white', textClass: 'text-slate-800', borderClass: 'border-slate-100' },
+noite: { fundo: 'bg-noite-fundo', primColor: '#38BDF8', headColor: '#1E293B', cardClass: 'bg-slate-800', textClass: 'text-slate-100', borderClass: 'border-slate-700/60' }
+};
+// Regra de cores de destaque para cada tipo de serviço
+const coresServicos = {
+"Corte Masculino": "bg-blue-50 text-blue-600 border border-blue-100",
+"Corte Feminino": "bg-purple-50 text-purple-600 border border-purple-100",
+"Barba Completa": "bg-amber-50 text-amber-600 border border-amber-100",
+"Combo: Corte + Barba": "bg-emerald-50 text-emerald-600 border border-emerald-100"
+};
+function mudarTema(tema) {
+const cfg = temasConfig[tema];
+const isNoite = tema === 'noite';
+// Modificação suave de cores de fundo estruturais
+document.getElementById('body-bg').className = ${cfg.fundo} ${cfg.textClass} font-sans min-h-screen transition-colors duration-500;
+document.getElementById('header-card').className = ${isNoite ? 'bg-slate-900 text-white border-slate-800' : 'bg-white text-slate-800 border-slate-100'} border-b shadow-sm sticky top-0 z-50 transition-all duration-500;
+document.getElementById('form-card').className = ${cfg.cardClass} rounded-2xl p-6 border shadow-xl flex flex-col justify-between transition-all duration-500 ${isNoite ? 'border-slate-700/60 shadow-none' : 'border-slate-100 shadow-slate-200/40'};
+document.getElementById('action-bar').className = ${cfg.cardClass} mt-6 p-4 rounded-xl border shadow-md flex flex-wrap justify-between items-center gap-4 transition-all duration-500 ${isNoite ? 'border-slate-700/60' : 'border-slate-100'};
+// Ajuste de cores de realce
+document.getElementById('brand-logo').style.backgroundColor = cfg.primColor;
+document.getElementById('form-title').style.color = cfg.primColor;
+document.getElementById('table-title').style.color = cfg.primColor;
+document.getElementById('btn-submit').style.backgroundColor = cfg.primColor;
+document.getElementById('table-header').style.backgroundColor = cfg.primColor;
+// Caixa de informações secundária
+document.getElementById('info-box').className = mt-8 p-4 rounded-xl flex gap-3 text-xs leading-relaxed transition-all duration-500 ${isNoite ? 'bg-slate-700/40 text-slate-400 border-none' : 'bg-slate-50 border border-slate-100 text-slate-500'};
+atualizarTabela(agendamentos);
+}
+function formatarDataBR(dataISO) {
+const partes = dataISO.split('-');
+return ${partes[2]}/${partes[1]}/${partes[0]};
+}
+function atualizarTabela(dados) {
+const tbody = document.getElementById('lista-agendamentos');
+tbody.innerHTML = '';
+const isNoite = document.getElementById('theme-select').value === 'noite';
+if (dados.length === 0) {
+tbody.innerHTML = <tr><td colspan="5" class="p-12 text-center text-slate-400 font-medium"><i class="fa-regular fa-folder-open text-2xl mb-2 block text-slate-300"></i> Nenhum compromisso agendado para este filtro.</td></tr>;
+return;
+}
+dados.forEach(ag => {
+const tr = document.createElement('tr');
+const tagCor = coresServicos[ag.servico] || "bg-slate-100 text-slate-700";
+// Classes de linha condizentes com seleção e modo escuro/claro
+let classeLinha = "cursor-pointer transition-all duration-200 ";
+if (idSelecionado === ag.id) {
+classeLinha += isNoite ? "bg-slate-700 text-white font-bold" : "bg-slate-100 text-slate-900 font-semibold";
+} else {
+classeLinha += isNoite ? "hover:bg-slate-700/40 text-slate-300" : "hover:bg-slate-50/80 text-slate-600";
+}
+tr.className = classeLinha;
+tr.onclick = () => selecionarLinha(ag.id);
+tr.innerHTML = `
+${ag.id}
+${ag.cliente}
+${ag.servico}
+${ag.profissional}
+\({formatarDataBR(ag.data)} às \){ag.horario}
+`;
+tbody.appendChild(tr);
+});
+}
+function selecionarLinha(id) {
+idSelecionado = (idSelecionado === id) ? null : id;
+atualizarTabela(agendamentos);
+}
+function limparSelecao() {
+idSelecionado = null;
+atualizarTabela(agendamentos);
+}
+function criarAgendamento(event) {
+event.preventDefault();
+const cliente = document.getElementById('nome').value.trim();
+const servico = document.getElementById('servico').value;
+const profesional = document.getElementById('profissional').value;
+const data = document.getElementById('data').value;
+const horario = document.getElementById('horario').value;
+// Bloqueio preventivo e amigável contra choques de agenda
+const conflito = agendamentos.some(ag => ag.profissional === profesional && ag.data === data && ag.horario === horario);
+if (conflito) {
+alert( O profissional selecionado já possui um atendimento reservado para este dia e horário. Que tal escolher outro momento perfeito para o cliente?);
+return;
+}
+agendamentos.push({ id: proximoId++, cliente, servico, profissional, data, horario });
+document.getElementById('form-agendamento').reset();
+document.getElementById('data').value = new Date().toISOString().split('T')[0];
+atualizarTabela(agendamentos);
+alert(" Excelente! O horário de atendimento foi reservado e salvo com sucesso!");
+}
+function liberarHorario() {
+if (!idSelecionado) {
+alert(" Dica: Clique primeiro em cima da linha do cliente desejado na tabela para poder liberar o horário.");
+return;
+}
+agendamentos = agendamentos.filter(ag => ag.id !== idSelecionado);
+idSelecionado = null;
+atualizarTabela(agendamentos);
+alert(" Agenda atualizada! O horário foi liberado com sucesso.");
+}
+function verFichaCompleta() {
+if (!idSelecionado) {
+alert(" Escolha um registro na tabela clicando sobre ele para abrir os detalhes.");
+return;
+}
+const ag = agendamentos.find(item => item.id === idSelecionado);
+alert( IDENTIFICAÇÃO DO AGENDAMENTO: #${ag.id}\n\n👤 CLIENTE: ${ag.cliente}\n PROCEDIMENTO: ${ag.servico}\n💈 PROFISSIONAL RESPONSÁVEL: ${ag.profissional}\n HORÁRIO RESERVADO: ${formatarDataBR(ag.data)} às ${ag.horario});
+}
+function filtrarClientes() {
+const termo = document.getElementById('busca').value.toLowerCase();
+const filtrados = agendamentos.filter(ag => ag.cliente.toLowerCase().includes(termo));
+atualizarTabela(filtrados);
+}
+// Renderização Inicial das Estruturas
+mudarTema('lavanda');
+
+
