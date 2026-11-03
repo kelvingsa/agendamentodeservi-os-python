@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flow - Gestão de Bem-Estar</title>
-    <!-- Tailwind CSS para um design limpo, minimalista e fluido -->
     <script src="https://tailwindcss.com"></script>
     <script>
-        // Configuração personalizada de temas baseada nos requisitos anteriores
         tailwind.config = {
             theme: {
                 extend: {
@@ -21,12 +19,9 @@
             }
         }
     </script>
-    <!-- Ícones modernos para os botões -->
     <link rel="stylesheet" href="https://cloudflare.com">
 </head>
 <body id="body-bg" class="bg-lavanda-fundo text-slate-800 font-sans min-h-screen transition-colors duration-300">
-
-    <!-- 1. BARRA SUPERIOR: SELETOR DE TEMAS COLORIDOS -->
     <header id="header-card" class="bg-white shadow-sm border-b border-slate-100 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
@@ -46,11 +41,7 @@
             </div>
         </div>
     </header>
-
-    <!-- CONTAINER PRINCIPAL EM DUAS COLUNAS -->
     <main class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        <!-- COLUNA ESQUERDA: FORMULÁRIO ENXUTO (CARD) -->
         <section id="form-card" class="lg:col-span-4 bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-100/50 flex flex-col justify-between transition-colors duration-300">
             <div>
                 <h2 id="form-title" class="text-xl font-bold text-[#6C5CE7] mb-6 flex items-center gap-2 transition-colors duration-300">
@@ -108,17 +99,17 @@
                 </form>
             </div>
             
-            <!-- Caixa de Notificação Sutil integrada ao Design -->
+        
             <div id="info-box" class="mt-6 p-4 rounded-xl bg-slate-50 border border-slate-100 flex gap-3 text-xs text-slate-600">
                 <span class="text-base text-amber-500"><i class="fa-regular fa-lightbulb"></i></span>
                 <p><strong>Dica de Uso:</strong> Você pode clicar em qualquer linha da tabela para selecioná-la e usar os botões do menu inferior de ações.</p>
             </div>
         </section>
 
-        <!-- COLUNA DIREITA: PAINEL DE VISUALIZAÇÃO CLARA -->
+        
         <section class="lg:col-span-8 flex flex-col justify-between">
             <div>
-                <!-- Menu superior do usuário: Busca e Filtro rápido -->
+            
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <h2 id="table-title" class="text-xl font-bold text-[#6C5CE7] transition-colors duration-300">Agenda do Salão</h2>
                     <div class="w-full sm:w-auto flex items-center gap-2 bg-white rounded-xl px-3 py-1.5 border border-slate-200 shadow-sm focus-within:ring-2 focus-within:ring-[#6C5CE7]/20">
@@ -127,7 +118,6 @@
                     </div>
                 </div>
 
-                <!-- Tabela responsiva minimalista -->
                 <div class="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse text-sm">
