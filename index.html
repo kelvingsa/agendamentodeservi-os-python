@@ -4,262 +4,351 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flow — Gestão de Bem-Estar</title>
-    <script src="https://jsdelivr.net"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        lavanda: { fundo: '#F8F7FC', primaria: '#6C5CE7', secundaria: '#A29BFE', card: '#FFFFFF', texto: '#2D3436' },
-                        botanico: { fundo: '#F4F9F6', primaria: '#10AC84', secundaria: '#1DD1A1', card: '#FFFFFF', texto: '#222F3E' },
-                        por_do_sol: { fundo: '#FFFBF7', primaria: '#FF6B6B', secundaria: '#FFA801', card: '#FFFFFF', texto: '#2C3E50' },
-                        noite: { fundo: '#0F172A', primaria: '#38BDF8', secundaria: '#1E293B', card: '#1E293B', texto: '#F8FAFC' }
-                    }
-                }
-            }
-        }
-    </script>
-    
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cloudflare.com">
-</head>
-<body id="body-bg" class="bg-lavanda-fundo text-slate-800 font-sans min-h-screen transition-colors duration-500">
 
-    
-    <header id="header-card" class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-50 transition-all duration-500">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div id="brand-logo" class="bg-[#6C5CE7] text-white p-2.5 rounded-xl shadow-md transition-all duration-500">
-                    <i class="fa-solid fa-sparkles text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-black tracking-wider" id="main-title">FLOW <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 uppercase tracking-widest ml-1">Studio</span></h1>
-                    <p class="text-xs text-slate-400 font-medium">Protótipo de Agendamento</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-3 bg-slate-50 p-1.5 rounded-xl border border-slate-200/60">
-                <span class="text-xs font-bold uppercase tracking-wider text-slate-400 pl-2 flex items-center gap-1.5">
-                    <i class="fa-solid fa-palette text-sm"></i> Tema:
-                </span>
-                <select id="theme-select" onchange="mudarTema(this.value)" class="bg-white border border-slate-200/80 text-sm rounded-lg px-3 py-1.5 font-bold shadow-sm focus:outline-none cursor-pointer text-slate-700">
-                    <option value="lavanda">🪻 Lavanda Relaxante</option>
-                    <option value="botanico"> Verde Botânico</option>
-                    <option value="por_do_sol"> Pôr do Sol Quente</option>
-                    <option value="noite"> Noite Elegante</option>
-                </select>
-            </div>
-        </div>
-    </header>
-
-    <!-- CONTAINER PRINCIPAL -->
-    <main class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <style>
         
-        
-        <section id="form-card" class="lg:col-span-4 bg-white rounded-2xl p-6 border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col justify-between transition-all duration-500">
-            <div>
-                <div class="border-b border-slate-100 pb-4 mb-6">
-                    <h2 id="form-title" class="text-lg font-bold text-[#6C5CE7] flex items-center gap-2 transition-colors duration-500">
-                        <i class="fa-regular fa-calendar-plus text-xl"></i> Agendar Novo Horário
-                    </h2>
-                    <p class="text-xs text-slate-400 mt-1">Preencha os dados do cliente para reservar.</p>
-                </div>
-                
-                <form id="form-agendamento" onsubmit="criarAgendamento(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Nome do Cliente</label>
-                        <input type="text" id="nome" placeholder="Nome completo" required class="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/20 focus:border-[#6C5CE7] transition-all font-medium">
-                    </div>
+        :root {
+            --fundo: #F8F7FC;
+            --primaria: #6C5CE7;
+            --secundaria: #A29BFE;
+            --card: #FFFFFF;
+            --texto: #2D3436;
+            --texto-suave: #636E72;
+            --borda: #E2E8F0;
+            --tag-masc: #EBF8FF; --tag-masc-txt: #2B6CB0;
+            --tag-fem: #FAF5FF; --tag-fem-txt: #6B46C1;
+            --tag-barba: #FFFAF0; --tag-barba-txt: #B7791F;
+            --tag-combo: #E6FFFA; --tag-combo-txt: #234E52;
+        }
 
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Serviço Especial</label>
-                        <select id="servico" class="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/20 focus:border-[#6C5CE7] transition-all font-medium cursor-pointer">
-                            <option value="Corte Masculino">Corte Masculino — R$ 45,00</option>
-                            <option value="Corte Feminino">Corte Feminino — R$ 70,00</option>
-                            <option value="Barba Completa">Barba Completa — R$ 30,00</option>
-                            <option value="Combo: Corte + Barba">Combo: Corte + Barba — R$ 65,00</option>
-                        </select>
-                    </div>
+        [data-theme="botanico"] {
+            --fundo: #F4F9F6;
+            --primaria: #10AC84;
+            --secundaria: #1DD1A1;
+            --card: #FFFFFF;
+            --texto: #222F3E;
+            --texto-suave: #576574;
+            --borda: #EEF2F0;
+        }
 
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Profissional</label>
-                        <select id="profissional" class="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/20 focus:border-[#6C5CE7] transition-all font-medium cursor-pointer">
-                            <option value="Carlos Silva (Moderno)">Carlos Silva (Moderno)</option>
-                            <option value="Ana Oliveira (Feminino)">Ana Oliveira (Feminino)</option>
-                            <option value="Marcos Sousa (Clássico)">Marcos Sousa (Clássico)</option>
-                        </select>
-                    </div>
+        [data-theme="por_do_sol"] {
+            --fundo: #FFFBF7;
+            --primaria: #FF6B6B;
+            --secundaria: #FFA801;
+            --card: #FFFFFF;
+            --texto: #2C3E50;
+            --texto-suave: #7F8C8D;
+            --borda: #FDF1E6;
+        }
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Data</label>
-                            <input type="date" id="data" required class="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/20 focus:border-[#6C5CE7] transition-all font-medium">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Horário</label>
-                            <select id="horario" class="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/20 focus:border-[#6C5CE7] transition-all font-medium cursor-pointer">
-                                <option value="09:00">09:00</option>
-                                <option value="10:00">10:00</option>
-                                <option value="11:00">11:00</option>
-                                <option value="13:00">13:00</option>
-                                <option value="14:00">14:00</option>
-                                <option value="15:00">15:00</option>
-                                <option value="16:00">16:00</option>
-                                <option value="17:00">17:00</option>
-                            </select>
-                        </div>
-                    </div>
+        [data-theme="noite"] {
+            --fundo: #0F172A;
+            --primaria: #38BDF8;
+            --secundaria: #334155;
+            --card: #1E293B;
+            --texto: #F8FAFC;
+            --texto-suave: #94A3B8;
+            --borda: #334155;
+            --tag-masc: #1E3A8A; --tag-masc-txt: #93C5FD;
+            --tag-fem: #581C87; --tag-fem-txt: #E9D5FF;
+            --tag-barba: #78350F; --tag-barba-txt: #FDE68A;
+            --tag-combo: #064E3B; --tag-combo-txt: #99F6E4;
+        }
 
-                    <button type="submit" id="btn-submit" class="w-full mt-4 bg-[#6C5CE7] hover:shadow-lg text-white font-bold text-sm rounded-xl py-3 shadow-md shadow-[#6C5CE7]/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
-                        <i class="fa-solid fa-square-plus text-base"></i> Confirmar Agendamento
-                    </button>
-                </form>
-            </div>
-            
-            <div id="info-box" class="mt-8 p-4 rounded-xl bg-slate-50 border border-slate-100 flex gap-3 text-xs text-slate-500 leading-relaxed">
-                <span class="text-amber-500 text-sm"><i class="fa-solid fa-circle-info"></i></span>
-                <p><strong>Gerenciamento Ágil:</strong> Clique em uma linha na tabela para selecioná-la. Você poderá ver os detalhes completos ou liberar o horário usando as ações inferiores.</p>
-            </div>
-        </section>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--fundo);
+            color: var(--texto);
+            min-height: screen;
+            transition: background-color 0.4s inside, color 0.4s ease;
+        }
 
         
-        <section class="lg:col-span-8 flex flex-col justify-between">
-            <div class="space-y-4">
-                
-                
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-slate-100 shadow-sm shadow-slate-200/20">
-                    <div>
-                        <h2 id="table-title" class="text-lg font-bold text-[#6C5CE7] transition-colors duration-500">Painel de Agendamentos</h2>
-                        <p class="text-xs text-slate-400">Gerenciamento em tempo real.</p>
-                    </div>
-                    <div class="w-full sm:w-auto flex items-center gap-2 bg-slate-50 rounded-xl px-3 py-2 border border-slate-200/80 focus-within:ring-2 focus-within:ring-[#6C5CE7]/20 focus-within:bg-white transition-all">
-                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm"></i>
+        header {
+            background-color: var(--card);
+            border-bottom: 1px solid var(--borda);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            transition: background-color 0.4s ease, border-color 0.4s ease;
+        }
 
-                        
-let agendamentos = [
-{ id: 1, cliente: "Lucas Almeida", servico: "Corte Masculino", profissional: "Carlos Silva (Moderno)", data: "2026-11-15", horario: "10:00" },
-{ id: 2, cliente: "Mariana Costa", servico: "Corte Feminino", profissional: "Ana Oliveira (Feminino)", data: "2026-11-15", horario: "14:00" }
-];
-let proximoId = 3;
-let idSelecionado = null;
-// Inicia com a data de hoje configurada no campo para poupar tempo
-document.getElementById('data').value = new Date().toISOString().split('T')[0];
-// Mapeamento das Paletas de Cores por Tema
-const temasConfig = {
-lavanda: { fundo: 'bg-lavanda-fundo', primColor: '#6C5CE7', headColor: '#A29BFE', cardClass: 'bg-white', textClass: 'text-slate-800', borderClass: 'border-slate-100' },
-botanico: { fundo: 'bg-botanico-fundo', primColor: '#10AC84', headColor: '#1DD1A1', cardClass: 'bg-white', textClass: 'text-slate-800', borderClass: 'border-slate-100' },
-por_do_sol: { fundo: 'bg-por_do_sol-fundo', primColor: '#FF6B6B', headColor: '#FFA801', cardClass: 'bg-white', textClass: 'text-slate-800', borderClass: 'border-slate-100' },
-noite: { fundo: 'bg-noite-fundo', primColor: '#38BDF8', headColor: '#1E293B', cardClass: 'bg-slate-800', textClass: 'text-slate-100', borderClass: 'border-slate-700/60' }
-};
-// Regra de cores de destaque para cada tipo de serviço
-const coresServicos = {
-"Corte Masculino": "bg-blue-50 text-blue-600 border border-blue-100",
-"Corte Feminino": "bg-purple-50 text-purple-600 border border-purple-100",
-"Barba Completa": "bg-amber-50 text-amber-600 border border-amber-100",
-"Combo: Corte + Barba": "bg-emerald-50 text-emerald-600 border border-emerald-100"
-};
-function mudarTema(tema) {
-const cfg = temasConfig[tema];
-const isNoite = tema === 'noite';
-// Modificação suave de cores de fundo estruturais
-document.getElementById('body-bg').className = ${cfg.fundo} ${cfg.textClass} font-sans min-h-screen transition-colors duration-500;
-document.getElementById('header-card').className = ${isNoite ? 'bg-slate-900 text-white border-slate-800' : 'bg-white text-slate-800 border-slate-100'} border-b shadow-sm sticky top-0 z-50 transition-all duration-500;
-document.getElementById('form-card').className = ${cfg.cardClass} rounded-2xl p-6 border shadow-xl flex flex-col justify-between transition-all duration-500 ${isNoite ? 'border-slate-700/60 shadow-none' : 'border-slate-100 shadow-slate-200/40'};
-document.getElementById('action-bar').className = ${cfg.cardClass} mt-6 p-4 rounded-xl border shadow-md flex flex-wrap justify-between items-center gap-4 transition-all duration-500 ${isNoite ? 'border-slate-700/60' : 'border-slate-100'};
-// Ajuste de cores de realce
-document.getElementById('brand-logo').style.backgroundColor = cfg.primColor;
-document.getElementById('form-title').style.color = cfg.primColor;
-document.getElementById('table-title').style.color = cfg.primColor;
-document.getElementById('btn-submit').style.backgroundColor = cfg.primColor;
-document.getElementById('table-header').style.backgroundColor = cfg.primColor;
-// Caixa de informações secundária
-document.getElementById('info-box').className = mt-8 p-4 rounded-xl flex gap-3 text-xs leading-relaxed transition-all duration-500 ${isNoite ? 'bg-slate-700/40 text-slate-400 border-none' : 'bg-slate-50 border border-slate-100 text-slate-500'};
-atualizarTabela(agendamentos);
-}
-function formatarDataBR(dataISO) {
-const partes = dataISO.split('-');
-return ${partes[2]}/${partes[1]}/${partes[0]};
-}
-function atualizarTabela(dados) {
-const tbody = document.getElementById('lista-agendamentos');
-tbody.innerHTML = '';
-const isNoite = document.getElementById('theme-select').value === 'noite';
-if (dados.length === 0) {
-tbody.innerHTML = <tr><td colspan="5" class="p-12 text-center text-slate-400 font-medium"><i class="fa-regular fa-folder-open text-2xl mb-2 block text-slate-300"></i> Nenhum compromisso agendado para este filtro.</td></tr>;
-return;
-}
-dados.forEach(ag => {
-const tr = document.createElement('tr');
-const tagCor = coresServicos[ag.servico] || "bg-slate-100 text-slate-700";
-// Classes de linha condizentes com seleção e modo escuro/claro
-let classeLinha = "cursor-pointer transition-all duration-200 ";
-if (idSelecionado === ag.id) {
-classeLinha += isNoite ? "bg-slate-700 text-white font-bold" : "bg-slate-100 text-slate-900 font-semibold";
-} else {
-classeLinha += isNoite ? "hover:bg-slate-700/40 text-slate-300" : "hover:bg-slate-50/80 text-slate-600";
-}
-tr.className = classeLinha;
-tr.onclick = () => selecionarLinha(ag.id);
-tr.innerHTML = `
-${ag.id}
-${ag.cliente}
-${ag.servico}
-${ag.profissional}
-\({formatarDataBR(ag.data)} às \){ag.horario}
-`;
-tbody.appendChild(tr);
-});
-}
-function selecionarLinha(id) {
-idSelecionado = (idSelecionado === id) ? null : id;
-atualizarTabela(agendamentos);
-}
-function limparSelecao() {
-idSelecionado = null;
-atualizarTabela(agendamentos);
-}
-function criarAgendamento(event) {
-event.preventDefault();
-const cliente = document.getElementById('nome').value.trim();
-const servico = document.getElementById('servico').value;
-const profesional = document.getElementById('profissional').value;
-const data = document.getElementById('data').value;
-const horario = document.getElementById('horario').value;
-// Bloqueio preventivo e amigável contra choques de agenda
-const conflito = agendamentos.some(ag => ag.profissional === profesional && ag.data === data && ag.horario === horario);
-if (conflito) {
-alert( O profissional selecionado já possui um atendimento reservado para este dia e horário. Que tal escolher outro momento perfeito para o cliente?);
-return;
-}
-agendamentos.push({ id: proximoId++, cliente, servico, profissional, data, horario });
-document.getElementById('form-agendamento').reset();
-document.getElementById('data').value = new Date().toISOString().split('T')[0];
-atualizarTabela(agendamentos);
-alert(" Excelente! O horário de atendimento foi reservado e salvo com sucesso!");
-}
-function liberarHorario() {
-if (!idSelecionado) {
-alert(" Dica: Clique primeiro em cima da linha do cliente desejado na tabela para poder liberar o horário.");
-return;
-}
-agendamentos = agendamentos.filter(ag => ag.id !== idSelecionado);
-idSelecionado = null;
-atualizarTabela(agendamentos);
-alert(" Agenda atualizada! O horário foi liberado com sucesso.");
-}
-function verFichaCompleta() {
-if (!idSelecionado) {
-alert(" Escolha um registro na tabela clicando sobre ele para abrir os detalhes.");
-return;
-}
-const ag = agendamentos.find(item => item.id === idSelecionado);
-alert( IDENTIFICAÇÃO DO AGENDAMENTO: #${ag.id}\n\n👤 CLIENTE: ${ag.cliente}\n PROCEDIMENTO: ${ag.servico}\n💈 PROFISSIONAL RESPONSÁVEL: ${ag.profissional}\n HORÁRIO RESERVADO: ${formatarDataBR(ag.data)} às ${ag.horario});
-}
-function filtrarClientes() {
-const termo = document.getElementById('busca').value.toLowerCase();
-const filtrados = agendamentos.filter(ag => ag.cliente.toLowerCase().includes(termo));
-atualizarTabela(filtrados);
-}
-// Renderização Inicial das Estruturas
-mudarTema('lavanda');
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
 
+        @media(min-width: 640px) {
+            .header-container { flex-direction: row; justify-content: space-between; }
+        }
 
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-logo {
+            background-color: var(--primaria);
+            color: #FFFFFF;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.4s ease;
+        }
+
+        .brand h1 {
+            font-size: 1.25rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+        }
+
+        .brand p {
+            font-size: 0.75rem;
+            color: var(--texto-suave);
+        }
+
+        .theme-selector-box {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--fundo);
+            padding: 0.35rem 0.75rem;
+            border-radius: 12px;
+            border: 1px solid var(--borda);
+        }
+
+        .theme-selector-box span {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--texto-suave);
+            text-transform: uppercase;
+        }
+
+        select, input, RoyalSelect {
+            background-color: var(--card);
+            color: var(--texto);
+            border: 1px solid var(--borda);
+            padding: 0.6rem 1rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--primaria);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+        }
+
+        
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-cols: 1fr;
+            gap: 2rem;
+        }
+
+        @media(min-width: 1024px) {
+            main { grid-template-columns: 4fr 8fr; }
+        }
+
+        
+        .card-box {
+            background-color: var(--card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid var(--borda);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.02);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: background-color 0.4s ease, border-color 0.4s ease;
+        }
+
+        .card-header {
+            border-bottom: 1px solid var(--borda);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header h2 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--primaria);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-header p {
+            font-size: 0.75rem;
+            color: var(--texto-suave);
+            margin-top: 0.25rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--texto-suave);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primaria);
+            color: #FFFFFF;
+            width: 100%;
+            padding: 0.85rem;
+            margin-top: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(108, 92, 231, 0.2);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        .info-box {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: var(--fundo);
+            border-radius: 12px;
+            border: 1px solid var(--borda);
+            display: flex;
+            gap: 0.75rem;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            color: var(--texto-suave);
+        }
+
+        .info-box i {
+            color: #F59E0B;
+            font-size: 1rem;
+        }
+
+        /* --- TABELA DE AGENDAMENTOS --- *
+        .panel-header {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            background-color: var(--card);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--borda);
+        }
+
+        @media(min-width: 640px) {
+            .panel-header { flex-direction: row; justify-content: space-between; align-items: center; }
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--fundo);
+            border: 1px solid var(--borda);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            width: 100%;
+        }
+
+        @media(min-width: 640px) {
+            .search-box { width: 300px; }
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            padding: 0;
+            width: 100%;
+        }
+
+        .search-box input:focus {
+            box-shadow: none;
+        }
+
+        .table-container {
+            background-color: var(--card);
+            border-radius: 16px;
+            border: 1px solid var(--borda);
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+
+        th {
+            background-color: var(--secundaria);
+            color: #FFFFFF;
+            font-weight: 600;
+            padding: 1rem;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--borda);
+        }
+
+        tr.selected {
