@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flow — Gestão de Bem-Estar</title>
-    <link rel="preconnect" href="https://googleapis.com">
-    <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <link href="https://googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cloudflare.com">
+    <!-- Fonte Inter para tipografia limpa e moderna -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome para ícones elegantes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        
+        /* --- ARQUITETURA DE CORES E VARIÁVEIS DE TEMAS --- */
         :root {
             --fundo: #F8F7FC;
             --primaria: #6C5CE7;
@@ -59,6 +61,7 @@
             --tag-combo: #064E3B; --tag-combo-txt: #99F6E4;
         }
 
+        /* --- CONFIGURAÇÕES BASE --- */
         * {
             margin: 0;
             padding: 0;
@@ -69,11 +72,11 @@
         body {
             background-color: var(--fundo);
             color: var(--texto);
-            min-height: screen;
-            transition: background-color 0.4s inside, color 0.4s ease;
+            min-height: 100vh;
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        
+        /* --- BARRA SUPERIOR (HEADER) --- */
         header {
             background-color: var(--card);
             border-bottom: 1px solid var(--borda);
@@ -117,13 +120,13 @@
             transition: background-color 0.4s ease;
         }
 
-        .brand h1 {
+        .brand-title {
             font-size: 1.25rem;
             font-weight: 900;
             letter-spacing: 0.05em;
         }
 
-        .brand p {
+        .brand-subtitle {
             font-size: 0.75rem;
             color: var(--texto-suave);
         }
@@ -138,14 +141,14 @@
             border: 1px solid var(--borda);
         }
 
-        .theme-selector-box span {
+        .theme-label {
             font-size: 0.75rem;
             font-weight: 700;
             color: var(--texto-suave);
             text-transform: uppercase;
         }
 
-        select, input, RoyalSelect {
+        select, input {
             background-color: var(--card);
             color: var(--texto);
             border: 1px solid var(--borda);
@@ -161,13 +164,13 @@
             box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
         }
 
-        
+        /* --- LAYOUT CENTRAL --- */
         main {
             max-width: 1200px;
             margin: 2rem auto;
             padding: 0 1.5rem;
             display: grid;
-            grid-template-cols: 1fr;
+            grid-template-columns: 1fr;
             gap: 2rem;
         }
 
@@ -175,7 +178,7 @@
             main { grid-template-columns: 4fr 8fr; }
         }
 
-        
+        /* --- CARDS E FORMULÁRIOS (COLUNA ESQUERDA) --- */
         .card-box {
             background-color: var(--card);
             border-radius: 20px;
@@ -194,7 +197,7 @@
             margin-bottom: 1.5rem;
         }
 
-        .card-header h2 {
+        .card-title {
             font-size: 1.125rem;
             font-weight: 700;
             color: var(--primaria);
@@ -203,7 +206,7 @@
             gap: 0.5rem;
         }
 
-        .card-header p {
+        .card-subtitle {
             font-size: 0.75rem;
             color: var(--texto-suave);
             margin-top: 0.25rem;
@@ -278,20 +281,36 @@
             font-size: 1rem;
         }
 
-        /* --- TABELA DE AGENDAMENTOS --- *
+        /* --- PAINEL E CONTROLE DA TABELA (COLUNA DIREITA) --- */
+        .panel-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
         .panel-header {
             display: flex;
             flex-direction: column;
             gap: 1rem;
-            margin-bottom: 1rem;
+            margin-bottom: 0.25rem;
             background-color: var(--card);
-            padding: 1rem;
-            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            border-radius: 16px;
             border: 1px solid var(--borda);
         }
 
         @media(min-width: 640px) {
             .panel-header { flex-direction: row; justify-content: space-between; align-items: center; }
+        }
+
+        .panel-headline h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+
+        .panel-headline p {
+            font-size: 0.75rem;
+            color: var(--texto-suave);
         }
 
         .search-box {
@@ -344,6 +363,11 @@
             color: #FFFFFF;
             font-weight: 600;
             padding: 1rem;
+            user-select: none;
+        }
+
+        [data-theme="noite"] th {
+            color: var(--texto);
         }
 
         td {
@@ -352,3 +376,389 @@
         }
 
         tr.selected {
+            background-color: rgba(108, 92, 231, 0.08) !important;
+        }
+
+        [data-theme="noite"] tr.selected {
+            background-color: rgba(56, 189, 248, 0.15) !important;
+        }
+
+        tr.unselected:hover {
+            background-color: rgba(0, 0, 0, 0.015);
+        }
+
+        [data-theme="noite"] tr.unselected:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Tags Estilizadas */
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .tag-masculino { background-color: var(--tag-masc); color: var(--tag-masc-txt); }
+        .tag-feminino { background-color: var(--tag-fem); color: var(--tag-fem-txt); }
+        .tag-barba { background-color: var(--tag-barba); color: var(--tag-barba-txt); }
+        .tag-combo { background-color: var(--tag-combo); color: var(--tag-combo-txt); }
+
+        .time-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background-color: var(--fundo);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .text-center { text-align: center; }
+        .table-empty {
+            padding: 3rem;
+            text-align: center;
+            color: var(--texto-suave);
+            font-weight: 500;
+        }
+        .table-empty i {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.5;
+        }
+
+        /* --- BARRA DE AÇÕES INFERIOR --- */
+        .action-bar {
+            background-color: var(--card);
+            border: 1px solid var(--borda);
+            padding: 1rem 1.5rem;
+            border-radius: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-action {
+            padding: 0.6rem 1.2rem;
+            background-color: var(--fundo);
+            color: var(--texto);
+            border: 1px solid var(--borda);
+        }
+
+        .btn-action:hover {
+            background-color: var(--borda);
+        }
+
+        .btn-text {
+            background: transparent;
+            color: var(--texto-suave);
+            padding: 0.5rem 1rem;
+        }
+
+        .btn-text:hover {
+            color: var(--texto);
+        }
+
+        .btn-danger {
+            padding: 0.6rem 1.2rem;
+            background-color: #FFEEEE;
+            color: #E53E3E;
+            border: 1px solid #FED7D7;
+        }
+
+        [data-theme="noite"] .btn-danger {
+            background-color: #742A2A;
+            color: #FED7D7;
+            border-color: #9B2C2C;
+        }
+
+        .btn-danger:hover {
+            background-color: #E53E3E;
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+<body id="body-context" data-theme="lavanda">
+
+    <!-- CABEÇALHO -->
+    <header>
+        <div class="header-container">
+            <div class="brand">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-sparkles"></i>
+                </div>
+                <div>
+                    <h1 class="brand-title">FLOW STUDIO</h1>
+                    <p class="brand-subtitle">Gestão de Agenda & Design</p>
+                </div>
+            </div>
+            
+            <div class="theme-selector-box">
+                <span class="theme-label"><i class="fa-solid fa-palette"></i> Ambiente:</span>
+                <select id="theme-select" onchange="mudarTema(this.value)">
+                    <option value="lavanda">🪻 Lavanda Relaxante</option>
+                    <option value="botanico">🌿 Verde Botânico</option>
+                    <option value="por_do_sol">☀️ Pôr do Sol Quente</option>
+                    <option value="noite">🌙 Noite Elegante</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <!-- LAYOUT PRINCIPAL -->
+    <main>
+        
+        <!-- CARD DE AGENDAMENTO -->
+        <section class="card-box">
+            <div>
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fa-regular fa-calendar-plus"></i> Agendar Atendimento
+                    </h2>
+                    <p class="card-subtitle">Insira as preferências de agenda do cliente.</p>
+                </div>
+                
+                <form id="form-agendamento" onsubmit="criarAgendamento(event)">
+                    <div class="form-group">
+                        <label>Nome do Cliente</label>
+                        <input type="text" id="nome" placeholder="Ex: Lucas Almeida" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Serviço Especial</label>
+                        <select id="servico">
+                            <option value="Corte Masculino">Corte Masculino — R$ 45,00</option>
+                            <option value="Corte Feminino">Corte Feminino — R$ 70,00</option>
+                            <option value="Barba Completa">Barba Completa — R$ 30,00</option>
+                            <option value="Combo: Corte + Barba">Combo: Corte + Barba — R$ 65,00</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Profissional</label>
+                        <select id="profissional">
+                            <option value="Carlos Silva (Moderno)">Carlos Silva (Moderno)</option>
+                            <option value="Ana Oliveira (Feminino)">Ana Oliveira (Feminino)</option>
+                            <option value="Marcos Sousa (Clássico)">Marcos Sousa (Clássico)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Data</label>
+                            <input type="date" id="data" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Horário</label>
+                            <select id="horario">
+                                <option value="09:00">09:00</option>
+                                <option value="10:00">10:00</option>
+                                <option value="11:00">11:00</option>
+                                <option value="13:00">13:00</option>
+                                <option value="14:00">14:00</option>
+                                <option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option>
+                                <option value="17:00">17:00</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-submit" class="btn-primary">
+                        <i class="fa-solid fa-calendar-check"></i> Reservar Horário
+                    </button>
+                </form>
+            </div>
+            
+            <div class="info-box">
+                <i class="fa-solid fa-circle-info"></i>
+                <p><strong>Dica de uso:</strong> Para gerenciar, visualizar fichas completas ou cancelar, clique diretamente na linha desejada dentro da tabela de agendamentos.</p>
+            </div>
+        </section>
+
+        <!-- OPERAÇÃO DA AGENDA -->
+        <section class="panel-container">
+            
+            <!-- BUSCA RÁPIDA -->
+            <div class="panel-header">
+                <div class="panel-headline">
+                    <h3>Agenda Operacional</h3>
+                    <p class="panel-subtitle">Controle de horários em tempo real.</p>
+                </div>
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass" style="opacity:0.4"></i>
+                    <input type="text" id="busca" oninput="filtrarClientes()" placeholder="Buscar cliente por nome...">
+                </div>
+            </div>
+
+            <!-- LISTAGEM EM TABELA -->
+            <div class="table-container">
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width: 80px;">ID</th>
+                                <th>Cliente</th>
+                                <th>Serviço</th>
+                                <th>Profissional</th>
+                                <th>Data e Horário</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-agendamentos">
+                            <!-- Inserido via JS dinamicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- BARRA DE AÇÕES DO MENU -->
+            <div class="action-bar">
+                <div class="action-group">
+                    <button onclick="verFichaCompleta()" class="btn-action">
+                        <i class="fa-solid fa-address-card"></i> Ver Ficha Completa
+                    </button>
+                    <button onclick="limparSelecao()" class="btn-text">
+                        Limpar Seleção
+                    </button>
+                </div>
+                <button onclick="liberarHorario()" class="btn-danger">
+                    <i class="fa-regular fa-calendar-xmark"></i> Liberar Horário Selecionado
+                </button>
+            </div>
+
+        </section>
+    </main>
+
+    <script>
+        // Dados Iniciais do Banco de Dados em Memória
+        let agendamentos = [
+            { id: 1, cliente: "Lucas Almeida", servico: "Corte Masculino", profissional: "Carlos Silva (Moderno)", data: "2026-11-15", horario: "10:00" },
+            { id: 2, cliente: "Mariana Costa", servico: "Corte Feminino", profissional: "Ana Oliveira (Feminino)", data: "2026-11-15", horario: "14:00" }
+        ];
+        let proximoId = 3;
+        let idSelecionado = null;
+
+        // Define automaticamente a data atual no formulário de reserva
+        document.getElementById('data').value = new Date().toISOString().split('T')[0];
+
+        // Mapeamento de estilos CSS para tags dinâmicas por tipo de serviço
+        const mapeamentoTags = {
+            "Corte Masculino": "tag-masculino",
+            "Corte Feminino": "tag-feminino",
+            "Barba Completa": "tag-barba",
+            "Combo: Corte + Barba": "tag-combo"
+        };
+
+        function mudarTema(tema) {
+            document.getElementById('body-context').setAttribute('data-theme', tema);
+            idSelecionado = null; // Reseta seleção por segurança estética
+            atualizarTabela(agendamentos);
+        }
+
+        function formatarDataBR(dataISO) {
+            const partes = dataISO.split('-');
+            if(partes.length !== 3) return dataISO;
+            return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        }
+
+        function atualizarTabela(dados) {
+            const tbody = document.getElementById('lista-agendamentos');
+            tbody.innerHTML = '';
+
+            if (dados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="table-empty"><i class="fa-regular fa-folder-open"></i> Nenhum registro localizado para o filtro atual.</td></tr>`;
+                return;
+            }
+
+            dados.forEach(ag => {
+                const tr = document.createElement('tr');
+                const classeTag = mapeamentoTags[ag.servico] || '';
+
+                tr.className = (idSelecionado === ag.id) ? 'selected' : 'unselected';
+                tr.onclick = () => {
+                    idSelecionado = (idSelecionado === ag.id) ? null : ag.id;
+                    atualizarTabela(dados);
+                };
+
+                tr.innerHTML = `
+                    <td class="text-center font-bold opacity-60">${ag.id}</td>
+                    <td style="font-weight:600">${ag.cliente}</td>
+                    <td><span class="tag ${classeTag}">${ag.servico}</span></td>
+                    <td><i class="fa-solid fa-user-tie" style="margin-right: 6px; opacity: 0.4;"></i>${ag.profissional}</td>
+                    <td><span class="time-badge"><i class="fa-regular fa-clock" style="opacity: 0.5;"></i>${formatarDataBR(ag.data)} às ${ag.horario}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function limparSelecao() {
+            idSelecionado = null;
+            atualizarTabela(agendamentos);
+        }
+
+        function criarAgendamento(event) {
+            event.preventDefault();
+            const cliente = document.getElementById('nome').value.trim();
+            const servico = document.getElementById('servico').value;
+            const profissional = document.getElementById('profissional').value;
+            const data = document.getElementById('data').value;
+            const horario = document.getElementById('horario').value;
+
+            // Bloqueio preventivo e amigável contra choques de agenda (Conflitos)
+            const conflito = agendamentos.some(ag => ag.profissional === profissional && ag.data === data && ag.horario === horario);
+
+            if (conflito) {
+                alert("✨ O profissional selecionado já possui um atendimento reservado para este dia e horário. Que tal sugerir um outro momento especial para o cliente?");
+                return;
+            }
+
+            agendamentos.push({ id: proximoId++, cliente, servico, profissional, data, horario });
+            document.getElementById('form-agendamento').reset();
+            document.getElementById('data').value = new Date().toISOString().split('T')[0];
+
+            atualizarTabela(agendamentos);
+            alert("🎉 Excelente! O horário de atendimento foi reservado com sucesso!");
+        }
+
+        function liberarHorario() {
+            if (!idSelecionado) {
+                alert("💡 Dica: Selecione a linha do agendamento desejado na tabela antes de liberar o horário.");
+                return;
+            }
+
+            agendamentos = agendamentos.filter(ag => ag.id !== idSelecionado);
+            idSelecionado = null;
+            atualizarTabela(agendamentos);
+            alert("✅ Agenda atualizada! O horário foi liberado com sucesso.");
+        }
+
+        function verFichaCompleta() {
+            if (!idSelecionado) {
+                alert("🔍 Escolha um registro na tabela clicando sobre ele para abrir os detalhes.");
+                return;
+            }
+
+            const ag = agendamentos.find(item => item.id === idSelecionado);
+            alert(`🎫 DETALHES COMPLETOS DO AGENDAMENTO:\n\n👤 CLIENTE ESPECIAL: ${ag.cliente}\n💇 SERVIÇO: ${ag.servico}\n💈 PROFISSIONAL RESPONSÁVEL: ${ag.profissional}\n🗓️ DATA E HORÁRIO: ${formatarDataBR(ag.data)} às ${ag.horario}`);
+        }
+
+        function filtrarClientes() {
+            const termo = document.getElementById('busca').value.toLowerCase();
+            const filtrados = agendamentos.filter(ag => ag.cliente.toLowerCase().includes(termo));
+            atualizarTabela(filtrados);
+        }
+
+        // Execução e renderização inicial
+        mudarTema('lavanda');
+    </script>
+</body>
+</html>
