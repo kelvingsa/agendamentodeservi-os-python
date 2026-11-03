@@ -14,11 +14,53 @@ SERVICOS = [
 HORARIOS = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00"]
 
 agendamentos = [
-    {"id": 1, "cliente": "Lucas Almeida", "servico": "Corte Masculino", "profissional": "Carlos Silva (Moderno)", "data": "15/11/2026", "horario": "10:00"}
+    {"id": 1, "cliente": "Lucas Almeida", "servico": "Corte Masculino", "profissional": "Carlos Silva (Moderno)", "data": "15/11/2026", "horario": "10:00"},
+    {"id": 2, "cliente": "Mariana Costa", "servico": "Corte Feminino", "profissional": "Ana Oliveira (Feminino)", "data": "15/11/2026", "horario": "14:00"}
 ]
-proximo_id = 2
+proximo_id = 3
 
-# --- FUNÇÕES DE NEGÓCIO ---
+# --- PALETAS DE CORES (TEMAS) ---
+TEMAS = {
+    "Lavanda Relaxante": {"fundo": "#F3F0F7", "primaria": "#6C5CE7", "secundaria": "#A29BFE", "texto": "#2D3436", "card": "#FFFFFF"},
+    "Verde Botânico": {"fundo": "#F0F7F4", "primaria": "#10AC84", "secundaria": "#1DD1A1", "texto": "#222F3E", "card": "#FFFFFF"},
+    "Pôr do Sol Quente": {"fundo": "#FFF9F5", "primaria": "#FF6B6B", "secundaria": "#FFA801", "texto": "#2C3E50", "card": "#FFFFFF"},
+    "Noite Elegante": {"fundo": "#1E272E", "primaria": "#05C46B", "secundaria": "#485460", "texto": "#FFFFFF", "card": "#2F3640"}
+}
+tema_atual = "Lavanda Relaxante"
+
+# --- FUNÇÕES DE INTERAÇÃO E REGRAS DE NEGÓCIO ---
+def mudar_tema(event=None):
+    global tema_atual
+    tema_atual = combo_temas.get()
+    cores = TEMAS[tema_atual]
+    
+    # Atualiza janelas e frames principais
+    root.configure(bg=cores["fundo"])
+    frame_topo.configure(bg=cores["card"])
+    main_frame.configure(bg=cores["fundo"])
+    col_esquerda.configure(bg=cores["card"])
+    col_direita.configure(bg=cores["fundo"])
+    frame_botoes_menu.configure(bg=cores["fundo"])
+    
+    # Atualiza as labels de texto comuns
+    for label in labels_comuns:
+        label.configure(bg=cores["card"] if label.master == col_esquerda else cores["fundo"], fg=cores["texto"])
+    
+    # Atualiza os cabeçalhos
+    label_titulo_esq.configure(bg=cores["card"], fg=cores["primaria"])
+    label_titulo_dir.configure(bg=cores["fundo"], fg=cores["primaria"])
+    lbl_seletor.configure(bg=cores["card"], fg=cores["texto"])
+    
+    # Configura os estilos do TTK (Tabela e Combobox)
+    style.configure("Treeview", background=cores["card"], foreground=cores["texto"], fieldbackground=cores["card"])
+    style.configure("Treeview.Heading", background=cores["secundaria"], foreground="#FFFFFF")
+    
+    # Estilização manual dos botões coloridos
+    btn_confirmar.configure(bg=cores["primaria"], fg="#FFFFFF", activebackground=cores["secundaria"])
+    btn_liberar.configure(bg="#E74C3C", fg="#FFFFFF", activebackground="#FF7675")
+    btn_detalhes.configure(bg=cores["secundaria"], fg="#FFFFFF", activebackground=cores["primaria"])
+    btn_filtrar.configure(bg=cores["secundaria"], fg="#FFFFFF", activebackground=cores["primaria"])
+
 def confirmar_agendamento():
     global proximo_id
     cliente = entry_nome.get().strip()
@@ -27,133 +69,164 @@ def confirmar_agendamento():
     data = entry_data.get().strip()
     horario = combo_hora.get()
     
-    # Validações sutis e acolhedoras
     if not cliente:
-        messagebox.showinfo("Dica de Preenchimento", "Por favor, insira o nome do cliente para personalizarmos o atendimento. ✨")
-        return
-    if servico_idx == -1:
-        messagebox.showinfo("Dica", "Selecione o serviço desejado para sabermos como cuidar de você. ⭐")
+        messagebox.showinfo("Dica de Amigo", "Diga-nos o seu nome para personalizarmos seu atendimento! ")
         return
     
     try:
         datetime.datetime.strptime(data, "%d/%m/%Y")
     except ValueError:
-        messagebox.showinfo("Ajuste de Data", "Para organizarmos a agenda perfeitamente, digite a data no formato: DD/MM/AAAA 🗓️")
+        messagebox.showinfo("Ajuste de Data", "Para organizarmos tudo certinho, use o formato padrão: DD/MM/AAAA ")
         return
 
     servico_nome = SERVICOS[servico_idx]["nome"]
     
-    # Checagem de agenda livre
+    # Validação inteligente de choque de horários
     for ag in agendamentos:
-        if ag["profissional"] == profissional and ag["data"] == data and ag["horario"] == horario:
-            messagebox.showinfo("Horário Reservado", f"O profissional escolhido já tem um compromisso neste momento. Que tal escolher outro horário especial?")
+        if ag["profissional"] == profesional and ag["data"] == data and ag["horario"] == horario:
+            messagebox.showinfo("Horário Ocupado", "Este profissional já tem um agendamento nesta hora. Que tal escolher outro momento perfeito para você? ")
             return
 
-    # Salva o agendamento
     novo_ag = {
-        "id": proximo_id,
-        "cliente": cliente,
-        "servico": servico_nome,
-        "profissional": profissional,
-        "data": data,
-        "horario": horario
+        "id": proximo_id, "cliente": cliente, "servico": servico_nome,
+        "profissional": profissional, "data": data, "horario": horario
     }
     agendamentos.append(novo_ag)
     proximo_id += 1
     
-    # Limpa campos e atualiza visualização
     entry_nome.delete(0, tk.END)
     atualizar_lista()
-    messagebox.showinfo("Sucesso", "Seu momento de cuidado foi reservado com sucesso! 🎉")
+    messagebox.showinfo("Sucesso!", "Seu momento de autocuidado foi reservado com sucesso! ")
 
 def liberar_horario():
-    item_selecionado = tree.selection()
-    if not item_selecionado:
-        messagebox.showinfo("Dica", "Selecione o agendamento que deseja liberar na tabela ao lado. ✨")
+    selecionado = tree.selection()
+    if not selecionado:
+        messagebox.showinfo("Aviso", "Selecione o agendamento que deseja reorganizar na tabela ao lado. ")
         return
     
-    valores = tree.item(item_selecionado, "values")
-    id_agendamento = int(valores[0])
-    
+    id_ag = int(tree.item(selecionado, "values")[0])
     for ag in agendamentos:
-        if ag["id"] == id_agendamento:
+        if ag["id"] == id_ag:
             agendamentos.remove(ag)
             break
             
     atualizar_lista()
-    messagebox.showinfo("Agenda Atualizada", "Horário liberado com sucesso. Esperamos você em uma nova oportunidade! 🌿")
+    messagebox.showinfo("Agenda Atualizada", "Horário liberado com sucesso. Esperamos você em breve! ")
 
-def atualizar_lista():
-    # Limpa os dados antigos de forma suave
+def ver_detalhes():
+    selecionado = tree.selection()
+    if not selecionado:
+        messagebox.showinfo("Consulta", "Selecione um agendamento para ver os detalhes completos. ")
+        return
+    
+    valores = tree.item(selecionado, "values")
+    detalhes = f" Código: {valores[0]}\n👤 Cliente: {valores[1]}\n Serviço: {valores[2]}\n💈 Profissional: {valores[3]}\n Horário: {valores[4]}"
+    messagebox.showinfo("Detalhes do Agendamento", detalhes)
+
+def filtrar_clientes():
+    termo = entry_busca.get().strip().lower()
     for item in tree.get_children():
         tree.delete(item)
-    # Insere os novos de forma organizada
+    
+    for ag in agendamentos:
+        if termo in ag["cliente"].lower():
+            tree.insert("", tk.END, values=(ag["id"], ag["cliente"], ag["servico"], ag["profissional"], f"{ag['data']} às {ag['horario']}"))
+
+def atualizar_lista():
+    for item in tree.get_children():
+        tree.delete(item)
     for ag in agendamentos:
         tree.insert("", tk.END, values=(ag["id"], ag["cliente"], ag["servico"], ag["profissional"], f"{ag['data']} às {ag['horario']}"))
 
-# --- DESIGN DA INTERFACE MINIMALISTA ---
+# --- ESTRUTURA DA INTERFACE GRAFICA ---
 root = tk.Tk()
-root.title("Flow - Gestão de Bem-Estar")
-root.geometry("900x500")
-root.configure(bg="#FAFAFA") # Fundo off-white relaxante
+root.title("Flow Barber & Beauty - Protótipo de Agendamento")
+root.geometry("1000x600")
 
-# Configuração de estilo minimalista (Flat Design)
 style = ttk.Style()
 style.theme_use("clam")
-style.configure(".", background="#FAFAFA", foreground="#333333", font=("Helvetica", 10))
-style.configure("TLabel", background="#FAFAFA", font=("Helvetica", 10, "bold"))
-style.configure("Header.TLabel", font=("Helvetica", 16, "bold"), foreground="#1A1A1A")
-style.configure("TButton", background="#EAEAEA", borderwidth=0, focuscolor="none", padding=6)
-style.map("TButton", background=[("active", "#DCDCDC")])
-style.configure("Accent.TButton", background="#2D3748", foreground="white", font=("Helvetica", 10, "bold"))
-style.map("Accent.TButton", background=[("active", "#4A5568")])
+style.configure("Treeview", font=("Helvetica", 10), rowheight=25)
+style.configure("Treeview.Heading", font=("Helvetica", 10, "bold"))
 
-# Container Principal dividido em duas colunas (Esquerda: Cadastro / Direita: Visualização)
-main_frame = tk.Frame(root, bg="#FAFAFA", padding=20)
+labels_comuns = []
+
+# --- 1. BARRA SUPERIOR (MENU DE TEMAS) ---
+frame_topo = tk.Frame(root, height=50, bd=0, relief=tk.FLAT)
+frame_topo.pack(fill=tk.X, side=tk.TOP, ipady=5)
+
+lbl_seletor = tk.Label(frame_topo, text="Personalize as Cores do seu Espaço:", font=("Helvetica", 10, "bold"))
+lbl_seletor.pack(side=tk.LEFT, padx=20)
+
+combo_temas = ttk.Combobox(frame_topo, values=list(TEMAS.keys()), state="readonly", font=("Helvetica", 10))
+combo_temas.pack(side=tk.LEFT, padx=5)
+combo_temas.current(0)
+combo_temas.bind("<<ComboboxSelected>>", mudar_tema)
+
+# --- CONTAINER PRINCIPAL (DUAS COLUNAS) ---
+main_frame = tk.Frame(root, padding=20)
 main_frame.pack(fill=tk.BOTH, expand=True)
 
-col_esquerda = tk.Frame(main_frame, bg="#FAFAFA", width=350)
+# Coluna Esquerda - Formulário (Efeito Card Embutido)
+col_esquerda = tk.Frame(main_frame, width=360, bd=0, highlightthickness=1, highlightbackground="#E2E8F0", padding=20)
 col_esquerda.pack(side=tk.LEFT, fill=tk.BOTH, padx=(0, 20))
 col_esquerda.pack_propagate(False)
 
-col_direita = tk.Frame(main_frame, bg="#FAFAFA")
+# Coluna Direita - Tabela e Menus de Ação
+col_direita = tk.Frame(main_frame)
 col_direita.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
-# --- COLUNA ESQUERDA: FORMULÁRIO ENXUTO ---
-ttk.Label(col_esquerda, text="Novo Agendamento", style="Header.TLabel").pack(anchor=tk.W, pady=(0, 15))
+# --- ELEMENTOS DA COLUNA ESQUERDA (FORMULÁRIO) ---
+label_titulo_esq = tk.Label(col_esquerda, text="Agendar Momento", font=("Helvetica", 16, "bold"))
+label_titulo_esq.pack(anchor=tk.W, pady=(0, 15))
 
-ttk.Label(col_esquerda, text="Nome do Cliente").pack(anchor=tk.W, pady=(5, 2))
+lbl1 = tk.Label(col_esquerda, text="Nome do Cliente:", font=("Helvetica", 10, "bold"))
+lbl1.pack(anchor=tk.W, pady=(5, 2)); labels_comuns.append(lbl1)
 entry_nome = ttk.Entry(col_esquerda, font=("Helvetica", 11))
 entry_nome.pack(fill=tk.X, pady=(0, 10))
 
-ttk.Label(col_esquerda, text="Serviço Desejado").pack(anchor=tk.W, pady=(5, 2))
+lbl2 = tk.Label(col_esquerda, text="Serviço Desejado:", font=("Helvetica", 10, "bold"))
+lbl2.pack(anchor=tk.W, pady=(5, 2)); labels_comuns.append(lbl2)
 lista_servicos_texto = [f"{s['nome']} — R$ {s['preco']:.2f}" for s in SERVICOS]
 combo_servico = ttk.Combobox(col_esquerda, values=lista_servicos_texto, state="readonly", font=("Helvetica", 10))
 combo_servico.pack(fill=tk.X, pady=(0, 10))
 combo_servico.current(0)
 
-ttk.Label(col_esquerda, text="Profissional de Preferência").pack(anchor=tk.W, pady=(5, 2))
+lbl3 = tk.Label(col_esquerda, text="Profissional:", font=("Helvetica", 10, "bold"))
+lbl3.pack(anchor=tk.W, pady=(5, 2)); labels_comuns.append(lbl3)
 combo_prof = ttk.Combobox(col_esquerda, values=PROFISSIONAIS, state="readonly", font=("Helvetica", 10))
 combo_prof.pack(fill=tk.X, pady=(0, 10))
 combo_prof.current(0)
 
-ttk.Label(col_esquerda, text="Data Escolhida").pack(anchor=tk.W, pady=(5, 2))
+lbl4 = tk.Label(col_esquerda, text="Data Escolhida:", font=("Helvetica", 10, "bold"))
+lbl4.pack(anchor=tk.W, pady=(5, 2)); labels_comuns.append(lbl4)
 entry_data = ttk.Entry(col_esquerda, font=("Helvetica", 11))
-entry_data.insert(0, datetime.date.today().strftime("%d/%m/%Y")) # Sugere o dia de hoje
+entry_data.insert(0, datetime.date.today().strftime("%d/%m/%Y"))
 entry_data.pack(fill=tk.X, pady=(0, 10))
 
-ttk.Label(col_esquerda, text="Horário Ideal").pack(anchor=tk.W, pady=(5, 2))
+lbl5 = tk.Label(col_esquerda, text="Horário Disponível:", font=("Helvetica", 10, "bold"))
+lbl5.pack(anchor=tk.W, pady=(5, 2)); labels_comuns.append(lbl5)
 combo_hora = ttk.Combobox(col_esquerda, values=HORARIOS, state="readonly", font=("Helvetica", 10))
-combo_hora.pack(fill=tk.X, pady=(0, 20))
+combo_hora.pack(fill=tk.X, pady=(0, 25))
 combo_hora.current(0)
 
-btn_confirmar = ttk.Button(col_esquerda, text="Confirmar Horário", style="Accent.TButton", command=confirmar_agendamento)
-btn_confirmar.pack(fill=tk.X, ipady=4)
+btn_confirmar = tk.Button(col_esquerda, text="  Confirmar e Agendar", font=("Helvetica", 11, "bold"), bd=0, relief=tk.FLAT, cursor="hand2", command=confirmar_agendamento)
+btn_confirmar.pack(fill=tk.X, ipady=6)
 
-# --- COLUNA DIREITA: VISUALIZAÇÃO CLARA ---
-ttk.Label(col_direita, text="Agenda do Salão", style="Header.TLabel").pack(anchor=tk.W, pady=(0, 15))
+# --- ELEMENTOS DA COLUNA DIREITA (TABELA E BOTÕES DE MENU) ---
+label_titulo_dir = tk.Label(col_direita, text="Painel de Agendamentos Ativos", font=("Helvetica", 16, "bold"))
+label_titulo_dir.pack(anchor=tk.W, pady=(0, 15))
 
-# Tabela Minimalista para listagem limpa
+# Barra de Pesquisa Rápida (Filtro)
+frame_busca = tk.Frame(col_direita, bg="#FAFAFA")
+frame_busca.pack(fill=tk.X, pady=(0, 10))
+
+lbl_busca = tk.Label(frame_busca, text="Buscar Cliente:", font=("Helvetica", 10, "bold"))
+lbl_busca.pack(side=tk.LEFT, padx=(0, 10)); labels_comuns.append(lbl_busca)
+entry_busca = ttk.Entry(frame_busca, font=("Helvetica", 10), width=25)
+entry_busca.pack(side=tk.LEFT, padx=(0, 10))
+btn_filtrar = tk.Button(frame_busca, text="Filtrar", font=("Helvetica", 9, "bold"), bd=0, padding=4, command=filtrar_clientes)
+btn_filtrar.pack(side=tk.LEFT)
+
 columns = ("id", "cliente", "servico", "profissional", "horario")
 tree = ttk.Treeview(col_direita, columns=columns, show="headings", selectmode="browse")
 tree.heading("id", text="ID")
@@ -161,21 +234,16 @@ tree.heading("cliente", text="Cliente")
 tree.heading("servico", text="Serviço")
 tree.heading("profissional", text="Profissional")
 tree.heading("horario", text="Data & Horário")
-
-# Ajuste fino das larguras de coluna
 tree.column("id", width=40, anchor=tk.CENTER)
-tree.column("cliente", width=130, anchor=tk.W)
+tree.column("cliente", width=140, anchor=tk.W)
 tree.column("servico", width=120, anchor=tk.W)
-tree.column("profissional", width=140, anchor=tk.W)
-tree.column("horario", width=150, anchor=tk.W)
-tree.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
+tree.column("profissional", width=150, anchor=tk.W)
+tree.column("horario", width=160, anchor=tk.W)
+tree.pack(fill=tk.BOTH, expand=True, pady=(0, 15
 
-# Botão discreto de reorganização na barra inferior
-btn_reorganizar = ttk.Button(col_direita, text="Liberar Horário Selecionado", command=liberar_horario)
-btn_reorganizar.pack(anchor=tk.E, ipady=2)
-
-# Carrega os dados iniciais
-atualizar_lista()
-
-# Inicia a janela
-root.mainloop()
+    frame_botoes_menu = tk.Frame(col_direita)
+frame_botoes_menu.pack(fill=tk.X)
+btn_detalhes = tk.Button(frame_botoes_menu, text=" Ver Ficha Completa", font=("Helvetica", 10, "bold"), bd=0, relief=tk.FLAT, cursor="hand2", command=ver_detalhes)
+btn_detalhes.pack(side=tk.LEFT, padx=(0, 10), ipady=5, ipadx=10)
+btn_liberar = tk.Button(frame_botoes_menu, text=" Liberar Horário (Cancelar)", font=("Helvetica", 10, "bold"), bd=0, relief=tk.FLAT, cursor="hand2", command=liberar_horario)
+btn_liberar.pack(side=tk.RIGHT, ipady=5, ipadx=10)
