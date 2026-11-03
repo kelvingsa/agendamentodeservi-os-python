@@ -53,3 +53,4 @@ def cancelar(agendamento_id):
 if __name__ == "__main__":
     preparar_banco()
     app.run(debug=True)
+
